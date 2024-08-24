@@ -1,0 +1,18 @@
+<!-- templates/gestion_excel/view_data.html -->  
+<h2>Datos Cargados</h2>  
+<table>  
+    <tr>  
+        <th>Campo 1</th>  
+        <th>Campo 2</th>  
+    </tr>  
+    {% for entry in entries %}  
+    <tr>  
+        <td>{{ entry.data_field_1 }}</td>  
+        <td>{{ entry.data_field_2 }}</td>  
+    </tr>  
+    {% empty %}  
+    <tr>  
+        <td colspan="2">No hay datos disponibles.</td>  
+    </tr>  
+    {% endfor %}  
+</table>

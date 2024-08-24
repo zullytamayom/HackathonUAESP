@@ -1,0 +1,42 @@
+<!-- templates/gestion_excel/map_columns.html -->  
+<!DOCTYPE html>  
+<html lang="es">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>Mapear Columnas</title>  
+</head>  
+<body>  
+    <h1>Mapea las columnas de tu archivo Excel</h1>  
+    
+    <form method="post" action="{% url 'process_excel' %}">  
+        {% csrf_token %}  
+        <table>  
+            <thead>  
+                <tr>  
+                    <th>Columna del archivo</th>  
+                    <th>Campo del modelo</th>  
+                </tr>  
+            </thead>  
+            <tbody>  
+                {% for header in headers %}  
+                <tr>  
+                    <td>{{ header }}</td>  
+                    <td>  
+                        <select name="{{ header }}">  
+                            <option value="">Selecciona una opción</option>  
+                            <option value="data_field_1">Campo 1</option>  
+                            <option value="data_field_2">Campo 2</option>  
+                            <!-- Puedes añadir más opciones aquí -->  
+                        </select>  
+                    </td>  
+                </tr>  
+                {% endfor %}  
+            </tbody>  
+        </table>  
+        <button type="submit">Guardar</button>  
+    </form>  
+    <h2>Vista previa de los datos:</h2>  
+    <pre>{{ data }}</pre>  
+</body>  
+</html>
