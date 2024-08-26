@@ -18,7 +18,7 @@ ALLOWED_HOSTS = []
 
 LOGIN_URL = '/login/'
 # Duración de la sesión en segundos
-SESSION_COOKIE_AGE = 600  # 2 minutos
+SESSION_COOKIE_AGE = 1200  # 2 minutos
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 # Application definition
 
