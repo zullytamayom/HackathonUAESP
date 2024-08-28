@@ -1,61 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Datos - UAESP</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .table-wrapper {
-            margin-top: 20px;
-        }
-        .table thead th {
-            position: sticky;
-            top: 0;
-            background-color: #f8f9fa;
-            z-index: 1;
-        }
-        .editable {
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    <div class="container mt-5">
-        <h1>Datos Cargados</h1>
-        
-        <div class="table-wrapper">
-            <table class="table table-striped table-bordered">
-                <thead>
-                    <tr>
-                        {% for header in headers %}
-                        <th>{{ header }}</th>
-                        {% endfor %}
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in rows %}
-                    <tr>
-                        <form method="post" action="{% url 'update_record' row.0 %}">
-                            {% csrf_token %}
-                            {% for cell in row %}
-                            <td>
-                                <input type="text" name="{{ forloop.counter0 }}" value="{{ cell }}" class="form-control">
-                            </td>
-                            {% endfor %}
-                            <td>
-                                <button type="submit" class="btn btn-success btn-sm">Save</button>
-                            </td>
-                        </form>
-                    </tr>
+<!-- Modal HTML -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Editar Registro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm" method="post" action="{% url 'edit_record' record.0 %}">
+                    {% csrf_token %}
+                    <!-- Include ID field (hidden) -->
+                    <input type="hidden" name="id" value="{{ record.0 }}">
+
+                    <!-- Loop through each field in the JSON data -->
+                    {% for key, value in data_fields.items %}
+                        <div class="mb-3">
+                            <label for="{{ key }}" class="form-label">{{ key|capfirst }}</label>
+                            <input type="text" class="form-control" id="{{ key }}" name="data_{{ key }}" value="{{ value }}">
+                        </div>
                     {% endfor %}
-                </tbody>
-            </table>
+
+                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                </form>
+            </div>
         </div>
     </div>
-    
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</div>
+
+<!-- Trigger button -->
+<a href="#" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal" data-record-id="{{ record.id }}">Editar</a>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#editModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget); // Button that triggered the modal
+            var recordId = button.data('record-id'); // Extract info from data-* attributes
+            
+            var modal = $(this);
+            // You can also make an AJAX request to load the data if needed
+        });
+    });
+</script>

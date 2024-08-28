@@ -12,8 +12,9 @@ urlpatterns = [
     path('data/', include('gestion_excel.urls')),
     path('edit_<int:id>/', include('gestion_excel.urls')),
     path('delete_<int:id>/', include('gestion_excel.urls')),
-    path('report/', include('gestion_excel.urls')),  # Similar para otras rutas
-    path('', include('gestion_excel.urls')),
+    # path('report/', include('gestion_excel.urls')),  # Similar para otras rutas
+    # path('dashboard/', include('gestion_excel.urls')),
+ 
 
     
 ]

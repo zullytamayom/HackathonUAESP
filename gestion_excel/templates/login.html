@@ -1,4 +1,5 @@
-<!-- gestion_excel/templates/home.html -->
+
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,71 +10,168 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #656464; /* Azul oscuro */
+            background: url("{% static 'images/fondo.jpg' %}") no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
         }
+
         .login-container {
-            background-color: #5c799b; /* Negro */
-            padding: 2rem;
-            border-radius: 8px;
+            background-color: #ffffff; /* Fondo blanco */
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra sutil */
             width: 100%;
             max-width: 400px;
         }
+
         .login-container h1 {
-            color: #ffffff; /* Blanco */
+            color: #333333; /* Texto gris oscuro */
             margin-bottom: 1.5rem;
+            font-weight: bold;
+            font-size: 1.75rem;
+            text-align: center;
         }
-        .login-container .form-control {
-            border-radius: 0.25rem;
+
+        .form-control {
+            border-radius: 0.35rem;
+            border: 1px solid #ddd;
+            transition: border-color 0.3s;
         }
-        .login-container .btn-primary {
-            border-color: #878db9; /* Azul oscuro para el botón */
-            background-color: #003366; /* Azul más oscuro para el borde */
-            margin: right 2px;;
+
+        .form-control:focus {
+            border-color: #003366; /* Azul oscuro en foco */
+            box-shadow: 0 0 5px rgba(0, 51, 102, 0.2);
         }
-        .login-container .btn-primary:hover {
-            background-color: #003366;
-            border-color: #002233;
+
+        .btn-primary {
+            background-color: #003366; /* Azul oscuro */
+            border-color: #003366;
+            margin-top: 1rem;
+            transition: background-color 0.3s, border-color 0.3s;
         }
-        .login-container .form-group {
-            margin-bottom: 1rem;
+
+        .btn-primary:hover {
+            background-color: #002244; /* Azul más oscuro */
+            border-color: #002244;
         }
-        .navbar-nav {
-            margin-left: auto; /* Alinea el login a la derecha */
+
+        .form-group {
+            margin-bottom: 1.2rem;
         }
+        .form-container {
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-lg-custom {
+            padding: 12px 20px;
+            font-size: 16px;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+        }
+        .btn-container {
+            text-align: right;
+        }
+
+        #loginFormContainer {
+            background: rgba(255, 255, 255, 0.9); /* Fondo semi-transparente */
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        #loginForm .btn {
+            background-color: #2F4F4F; /* Color de fondo */
+            color: #ffffff; /* Color del texto */
+            border-radius: 12px; /* Bordes redondeados */
+            border: none; /* Eliminar borde predeterminado */
+            padding: 12px 20px; /* Tamaño del botón */
+            font-size: 16px; /* Tamaño de la fuente */
+            font-weight: bold; /* Fuente en negrita */
+            transition: background-color 0.3s ease; /* Efecto de transición en el hover */
+        }
+
+        #loginForm .btn:hover {
+            background-color: #1c1c1c; /* Color de fondo en el hover */
+        }
+
     </style>
 </head>
 <body>
-    <!-- Barra de navegación -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">AUESP</a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="{% url 'home' %}">Inicio</a>
-            </div>
-        </div>
-    </nav>
     <div class="login-container">
-        <h1 class="text-center">Login</h1>
-        <form method="post" action="{% url 'login' %}">
+        <h1>Login</h1>
+        <!-- Muestra el mensaje de error si existe -->
+        {% if messages %}
+            <div class="error-message">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endif %}
+        <form id="loginForm" method="post" action="{% url 'login' %}" novalidate>
             {% csrf_token %}
-            <div class="form-group">
-                <label for="username" class="text-white">Username</label>
-                <input type="text" id="username" name="username" class="form-control" placeholder="Enter your username" required>
+            <div class="form-group mb-3">
+                <label for="username" class="form-label">Usuario : </label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="Ingrese su usuario" required>
+                <div class="error-message" id="usernameError"></div>
             </div>
-            <div class="form-group">
-                <label for="password" class="text-white">Password</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
+            <div class="form-group mb-4">
+                <label for="password" class="form-label">Contraseña :</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Ingrese su contraseña" required>
+                <div class="error-message" id="passwordError"></div>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Login</button>
+            <div class="btn-container">
+                <button type="submit" class="btn btn-primary btn-lg btn-lg-custom">Ingresar</button>
+            </div>
         </form>
     </div>
 
     <!-- Incluye Bootstrap JS -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            // Reinicia los mensajes de error
+            document.getElementById('usernameError').textContent = '';
+            document.getElementById('passwordError').textContent = '';
+
+            let isValid = true;
+
+            // Validación del nombre de usuario
+            const username = document.getElementById('username').value;
+            if (username.trim() === '') {
+                document.getElementById('usernameError').textContent = 'Usuario requerido.';
+                isValid = false;
+            } else if (username.length < 3) {
+                document.getElementById('usernameError').textContent = 'El usuario debe tener al menos 3 caracteres.';
+                isValid = false;
+            }
+
+            // Validación de la contraseña
+            const password = document.getElementById('password').value;
+            if (password.trim() === '') {
+                document.getElementById('passwordError').textContent = 'Contraseña requerida.';
+                isValid = false;
+            } else if (password.length < 6) {
+                document.getElementById('passwordError').textContent = 'la contraseña debe tener al menos 6 caracteres.';
+                isValid = false;
+            }
+
+            // Si hay errores, evita el envío del formulario
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+    </script>
 </body>
 </html>

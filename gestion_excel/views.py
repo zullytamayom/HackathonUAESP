@@ -13,12 +13,23 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import DynamicDataForm
 from django.core.paginator import Paginator
+from .forms import DynamicDataForm
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
+from datetime import datetime
+from django.views.decorators.http import require_POST
+
+
 
 User = get_user_model()
 
 def home(request):
     return render(request, 'home.html')
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('/')  # Redirige a /home/ si el usuario ya está autenticado
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -27,7 +38,7 @@ def login_view(request):
             login(request, user)
             return redirect('home')  # Redirige a la página de inicio u otra página después del login
         else:
-            # Manejo de errores (opcional)
+            messages.error(request, 'Invalid username or password.')
             return render(request, 'login.html', {'error': 'Invalid credentials'})
     return render(request, 'login.html')
 
@@ -38,13 +49,14 @@ def handle_uploaded_file(file):
         DynamicData.objects.create(data=data)
 
 def sanitize_json(value):
-    """Sanitiza los valores para que sean válidos JSON."""
-    if isinstance(value, float) and (value != value):  # Check for NaN
-        return None
-    if isinstance(value, str) and value.strip().lower() in ["nan", ""]:
-        return None
+    if isinstance(value, datetime):
+        return value.isoformat()  # Convertir datetime a formato ISO
+    if isinstance(value, list):
+        return [sanitize_json(v) for v in value]
+    if isinstance(value, dict):
+        return {k: sanitize_json(v) for k, v in value.items()}
     return value
-@login_required
+
 def upload_file(request):
     if request.method == 'POST':
         file = request.FILES.get('file')
@@ -74,6 +86,8 @@ def upload_file(request):
             return HttpResponse(f"An error occurred: {e}", status=500)
     
     return render(request, 'upload.html')
+    
+    return render(request, 'upload.html')
 def get_table_data():
     rows = DynamicData.objects.all()
     headers = ['ID']
@@ -91,7 +105,9 @@ def get_table_data():
     
     return headers, row_data
 @login_required
+
 def data_table(request):
+    # Obtener todos los registros
     rows = DynamicData.objects.all()
     headers = ['ID']  # Incluye el campo 'ID' como columna
     
@@ -107,12 +123,13 @@ def data_table(request):
         data_row = [row.id]  # Empieza con el campo 'ID'
         data_row.extend(row.data.get(key, '') for key in headers[1:])  # Agrega los valores del JSON
         row_data.append(data_row)
-    headers, rows = get_table_data()
-    records_per_page = request.GET.get('records_per_page', 10)  # 10 es el valor predeterminado
+    
+    # Configuración de la paginación
+    records_per_page = request.GET.get('records_per_page', 10)  # Valor predeterminado: 10
     records_per_page = int(records_per_page)  # Convertir a entero
 
     # Crear un paginador con el número de registros por página seleccionado
-    paginator = Paginator(rows, records_per_page)
+    paginator = Paginator(row_data, records_per_page)
 
     # Obtener el número de página desde la URL
     page_number = request.GET.get('page')
@@ -120,37 +137,56 @@ def data_table(request):
     # Obtener la página actual
     page_obj = paginator.get_page(page_number)
     
-    return render(request, 'data_table.html', {
+   
+    
+    return render(request, 'data_table.html',{
         'rows': page_obj, 
         'headers': headers, 
         'page_obj': page_obj, 
-        'records_per_page': records_per_page
+        'records_per_page': records_per_page,
+        'total_records': rows.count(),  # Total de registros
+        'filtered_records': page_obj.paginator.count,  # Registros en la página actual (filtrados),
+        'user': request.user,
+        
     })
 
-def edit_record(request, id):
-    record = get_object_or_404(DynamicData, id=id)
-    
+# def delete_record(request, id):
+#     record = get_object_or_404(DynamicData, id=id)
+#     if request.method == 'POST':
+#         record.delete()
+#         return redirect('data_table')
+@csrf_exempt
+def update_record(request, id):
     if request.method == 'POST':
+        record = get_object_or_404(DynamicData, id=id)
         form = DynamicDataForm(request.POST, instance=record)
         if form.is_valid():
             form.save()
-            return redirect('data_table')
-    else:
-        form = DynamicDataForm(instance=record)
-    
-    return render(request, 'edit_record.html', {'form': form, 'record': record})
+            return JsonResponse({'status': 'success'})
+        else:
+            return JsonResponse({'status': 'error', 'errors': form.errors})
 
+
+@login_required
+@require_POST
 def delete_record(request, id):
     record = get_object_or_404(DynamicData, id=id)
-    if request.method == 'POST':
-        record.delete()
-        return redirect('data_table')
-@login_required
-def generate_report(request):
-    data = DynamicData.objects.all().values()
-    df = pd.DataFrame(list(data))
-    report = df.describe()  # Ejemplo de análisis
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename=report.csv'
-    df.to_csv(path_or_buf=response, index=False)
-    return response
+    record.delete()
+    return JsonResponse({'status': 'success'})
+
+def filter_records(request):
+    filters = {key: value for key, value in request.GET.items() if key.startswith('filter-') and value}
+    queryset = DynamicData.objects.all()  
+
+    field_names = [field.name for field in DynamicData._meta.fields]  # Obtén todos los nombres de campos del modelo
+
+    for key, value in filters.items():
+        column_index = int(key.split('-')[1])
+        field_name = field_names[column_index]
+
+        if field_name:
+            queryset = queryset.filter(**{f"{field_name}__icontains": value})
+
+    data = list(queryset.values(*field_names))
+    return JsonResponse({'data': data, 'fields': field_names}, safe=False)
+

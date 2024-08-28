@@ -18,6 +18,7 @@ class DynamicData(models.Model):
     data = models.JSONField()  # Django 3.1+ (previously used PostgreSQL JSONField)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
+
     def clean(self):
         super().clean()
         # Validar que los datos sean JSON válidos
@@ -25,3 +26,4 @@ class DynamicData(models.Model):
             json.dumps(self.data)
         except (TypeError, OverflowError) as e:
             raise ValidationError(f"Invalid JSON data: {e}")
+        
