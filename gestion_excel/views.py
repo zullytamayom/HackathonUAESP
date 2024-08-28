@@ -25,6 +25,7 @@ from django.views.decorators.http import require_POST
 
 User = get_user_model()
 
+
 def home(request):
     return render(request, 'home.html')
 def login_view(request):
@@ -57,6 +58,7 @@ def sanitize_json(value):
         return {k: sanitize_json(v) for k, v in value.items()}
     return value
 
+@login_required
 def upload_file(request):
     if request.method == 'POST':
         file = request.FILES.get('file')
@@ -150,11 +152,6 @@ def data_table(request):
         
     })
 
-# def delete_record(request, id):
-#     record = get_object_or_404(DynamicData, id=id)
-#     if request.method == 'POST':
-#         record.delete()
-#         return redirect('data_table')
 @csrf_exempt
 def update_record(request, id):
     if request.method == 'POST':

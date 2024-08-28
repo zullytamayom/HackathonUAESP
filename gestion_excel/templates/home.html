@@ -1,8 +1,40 @@
-{% extends 'base.html' %}
-
-{% block title %}Page Title{% endblock %}
-
 {% block content %}
-    <h1>HACKATHON UAESP 2024</h1>
-    <p>Bienvenido</p>
+
+        <style>
+            body {
+                background-color: #000000; /* Fondo negro */
+                color: #ffffff; /* Texto blanco */
+                text-align: center;
+                font-family: Arial, sans-serif;
+            }
+            .container {
+                margin-top: 20%;
+            }
+            h1 {
+                font-size: 4em; /* Título grande */
+                margin-bottom: 20px;
+            }
+            .login-link {
+                font-size: 1.5em; /* Tamaño del enlace */
+                color: #00BFFF; /* Color del enlace */
+                text-decoration: none;
+                padding: 10px 20px;
+                border: 2px solid #00BFFF; /* Borde del enlace */
+                border-radius: 5px;
+                background-color: #000000; /* Fondo del enlace */
+                transition: background-color 0.3s, color 0.3s;
+            }
+            .login-link:hover {
+                background-color: #00BFFF; /* Fondo del enlace al pasar el ratón */
+                color: #000000; /* Texto del enlace al pasar el ratón */
+            }
+        </style>
+    <body>
+        <div class="container">
+            <h1>Bienvenido</h1>
+            <a href="{% url 'login' %}" class="login-link">Iniciar Sesión</a>
+        </div>
+    </body>
+    </html>
+    
 {% endblock %}
