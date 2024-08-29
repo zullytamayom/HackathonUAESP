@@ -187,3 +187,5 @@ def filter_records(request):
     data = list(queryset.values(*field_names))
     return JsonResponse({'data': data, 'fields': field_names}, safe=False)
 
+def dashboard(request):
+    return render(request, 'dashboard.html')
